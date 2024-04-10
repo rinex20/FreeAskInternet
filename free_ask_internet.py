@@ -143,7 +143,7 @@ def chat(prompt, stream=True, debug=False):
     openai.api_key = os.getenv("OPENAI_API_KEY","sk-xxxx")
     total_content = ""
     for chunk in openai.chat.completions.create(
-        model= os.getenv("MODEL","gpt-3.5-turbo")
+        model= os.getenv("MODEL","gpt-3.5-turbo"),
         # model='Qwen1.5-1.8B-Chat',
         messages=[{
             "role": "user",

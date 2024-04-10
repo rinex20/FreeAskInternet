@@ -2,10 +2,9 @@ services:
   backend:
     image: docker.io/nashsu/free_ask_internet:latest
     environment:
-      OPENAI_API_KEY:
-      BASE_URL:
-    depends_on:
-      - freegpt35
+      OPENAI_API_KEY: "sk-xxxx"
+      BASE_URL: "https://api.openai.com/v1"
+      MODEL: "gpt-3.5-turbo"
     restart: on-failure
  
 
@@ -18,12 +17,6 @@ services:
       # CODE: "FreeAskInternet" # 如果你想要设置页面的访问密码，请修改这里
       BASE_URL: "http://backend:8000"
       CUSTOM_MODELS: "-all,+gpt-3.5-turbo"
-    depends_on:
-      - freegpt35
-    restart: always
-
-  freegpt35:
-    image: missuo/freegpt35:latest
     restart: always
 
   searxng:

@@ -3,7 +3,7 @@ services:
     image: docker.io/nashsu/free_ask_internet:latest
     environment:
       OPENAI_API_KEY: "sk-xxxx"
-      BASE_URL: "https://api.openai.com/v1"
+      BASE_URL: "https://api.openai.com/v1/"
       MODEL: "gpt-3.5-turbo"
     restart: on-failure
  

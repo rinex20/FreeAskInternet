@@ -139,11 +139,11 @@ def gen_prompt(question,content_list, context_length_limit=11000,debug=False):
 
 
 def chat(prompt, stream=True, debug=False):
-    openai.base_url = "http://freegpt35:3040/v1/"
-    openai.api_key = "EMPTY"
+    openai.base_url = os.getenv("BASE_URL","https://api.openai.com/v1")
+    openai.api_key = os.getenv("OPENAI_API_KEY","sk-xxxx")
     total_content = ""
     for chunk in openai.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model= os.getenv("MODEL","gpt-3.5-turbo")
         # model='Qwen1.5-1.8B-Chat',
         messages=[{
             "role": "user",

@@ -1,6 +1,9 @@
 services:
   backend:
     image: docker.io/nashsu/free_ask_internet:latest
+    environment:
+      OPENAI_API_KEY:
+      BASE_URL:
     depends_on:
       - freegpt35
     restart: on-failure

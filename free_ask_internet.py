@@ -34,8 +34,8 @@ def search_web_ref(query:str, debug=False):
     try:
 
         safe_string = urllib.parse.quote_plus(":all !general " + query)
-
-        response = requests.get('http://searxng:8080?q=' + safe_string + '&format=json')
+        url_host = os.getenv("SEARXNG_BASE_URL","http://searxng:8080")
+        response = requests.get(url_host  + '?q=' + safe_string + '&format=json')
         response.raise_for_status()
         search_results = response.json()
  
@@ -101,12 +101,30 @@ def search_web_ref(query:str, debug=False):
 
 def gen_prompt(question,content_list, lang="zh-CN", context_length_limit=11000,debug=False):
     
+    if debug:
+        print(f"Input content_list type: {type(content_list)}")
+        print(f"Input content_list: {content_list}")
+
+    if not isinstance(content_list, (list, tuple)):
+        raise TypeError(f"Expected content_list to be a list or tuple, got {type(content_list)}")
+
     limit_len = (context_length_limit - 2000)
     if len(question) > limit_len:
         question = question[0:limit_len]
-    
-    ref_content = [ item.get("content") for item in content_list]
-    
+
+    ref_content = []
+    for item in content_list:
+        if isinstance(item, dict):
+            content = item.get("content", "")
+        elif isinstance(item, (list, tuple)) and len(item) > 0:
+            content = item[0] if isinstance(item[0], str) else str(item[0])
+        else:
+            content = str(item)
+        ref_content.append(content)
+
+    if debug:
+        print(f"Processed ref_content: {ref_content}")
+
     answer_language = ' Simplified Chinese '
     if lang == "zh-CN":
         answer_language = ' Simplified Chinese '
@@ -168,11 +186,9 @@ def gen_prompt(question,content_list, lang="zh-CN", context_length_limit=11000,d
     return prompts
 
 
-def chat(prompt, model:str,llm_auth_token:str,llm_base_url:str,using_custom_llm=False,stream=True, debug=False):
-    openai.base_url = "http://127.0.0.1:3040/v1/"
-
-    if model == "gpt3.5":
-        openai.base_url = "http://llm-freegpt35:3040/v1/"
+def chat(prompt, model:str="gpt-3.5-turbo",llm_auth_token:str="ollama",llm_base_url:str="http://localhost:3040/v1/",using_custom_llm=False,stream=True, debug=False):
+    openai.base_url = os.getenv("BASE_URL","http://127.0.0.1:3040/v1/")
+    model = os.getenv("MODEL","gpt-3.5-turbo")
     
     if model == "kimi":
         openai.base_url = "http://llm-kimi:8000/v1/"
@@ -180,7 +196,6 @@ def chat(prompt, model:str,llm_auth_token:str,llm_base_url:str,using_custom_llm=
         openai.base_url = "http://llm-glm4:8000/v1/"
     if model == "qwen":
         openai.base_url = "http://llm-qwen:8000/v1/"
-    
 
     if llm_auth_token == '':
         llm_auth_token = "CUSTOM"
@@ -214,8 +229,7 @@ def chat(prompt, model:str,llm_auth_token:str,llm_base_url:str,using_custom_llm=
 
  
     
-def ask_internet(query:str,  debug=False):
-  
+def ask_internet(query:str,  debug=False): 
     content_list = search_web_ref(query,debug=debug)
     if debug:
         print(content_list)
@@ -229,13 +243,24 @@ def ask_internet(query:str,  debug=False):
             yield token
     yield "\n\n"
     # 是否返回参考资料
-    if True:
+    output_ref = os.getenv("OUTPUT_REF", "False")
+    if output_ref == "True":
         yield "---"
         yield "\n"
         yield "参考资料:\n"
         count = 1
         for url_content in content_list:
-            url = url_content.get('url')
+            if debug:
+                print(f"url_content type: {type(url_content)}")
+                print(f"url_content: {url_content}")
+            if isinstance(url_content, dict):
+                url = url_content.get('url', 'No URL available')
+            elif isinstance(url_content, list) and len(url_content) > 0:
+                # Assuming the URL is the first item in the list
+                url = url_content[0] if isinstance(url_content[0], str) else str(url_content[0])
+            else:
+                url = str(url_content)
+
             yield "*[{}. {}]({})*".format(str(count),url,url )  
             yield "\n"
             count += 1

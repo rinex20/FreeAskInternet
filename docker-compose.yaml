@@ -12,7 +12,7 @@ services:
     restart: on-failure
  
   freeaskinternet-ui:
-    image: docker.io/rinex20/free_ask_internet_ui:v2
+    image: docker.io/nashsu/free_ask_internet_ui:latest
     ports:
       - "3030:80"
     environment:

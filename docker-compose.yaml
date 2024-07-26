@@ -1,6 +1,6 @@
 services:
   backend:
-    image: ghcr.io/rinex20/free_ask_internet:latest
+    image: ghcr.io/rinex20/free_ask_internet:main
     ports:
       - "8000:8000"
     environment:

@@ -94,6 +94,8 @@ def search_web_ref(query:str, debug=False):
                     print("URL: {}".format(url))
                     print("=================")
  
+        if len(results)== 0 :
+            content_list = conv_links
         return  conv_links,content_list
     except Exception as ex:
         raise ex
